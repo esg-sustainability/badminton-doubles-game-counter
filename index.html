@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Badminton Doubles Game Counter</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --error: #e74c3c;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .input-section {
+            padding: 25px;
+            background: var(--light);
+        }
+        
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #count-btn {
+            background: var(--success);
+            color: white;
+            flex: 1;
+        }
+        
+        #count-btn:hover {
+            background: #27ae60;
+        }
+        
+        #reset-btn {
+            background: var(--warning);
+            color: white;
+        }
+        
+        #reset-btn:hover {
+            background: #e67e22;
+        }
+        
+        .results-section {
+            padding: 25px;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+        
+        .total-games {
+            background: var(--secondary);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #e8f4fc;
+        }
+        
+        .error-section {
+            padding: 15px;
+            margin: 20px 0;
+            background: #ffebee;
+            border-left: 5px solid var(--error);
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .error-title {
+            color: var(--error);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .instructions {
+            background: #e8f4fc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+        }
+        
+        .instructions h3 {
+            color: var(--secondary);
+            margin-bottom: 12px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            th, td {
+                padding: 12px 10px;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Badminton Doubles Game Counter</h1>
+            <p class="description">Paste your WhatsApp match records below to count how many games each player has played</p>
+        </header>
+        
+        <section class="input-section">
+            <div class="input-area">
+                <textarea id="match-input" placeholder="Paste your match records here (e.g., '1. Alvan Ang 21-12 Desment Jason')"></textarea>
+                <div class="buttons">
+                    <button id="count-btn">Count Games</button>
+                    <button id="reset-btn">Reset</button>
+                </div>
+            </div>
+        </section>
+        
+        <div id="error-section" class="error-section">
+            <div class="error-title">Error:</div>
+            <div id="error-message"></div>
+        </div>
+        
+        <section class="results-section">
+            <div class="results-header">
+                <h2>Player Statistics</h2>
+                <div class="total-games">Total Games: <span id="total-games">0</span></div>
+            </div>
+            <table id="results-table">
+                <thead>
+                    <tr>
+                        <th>Player Name</th>
+                        <th>Total Games</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Results will be populated here -->
+                </tbody>
+            </table>
+        </section>
+        
+        <div class="instructions">
+            <h3>How to use:</h3>
+            <ul>
+                <li>Copy the match records from your WhatsApp chat</li>
+                <li>Paste them into the text area above</li>
+                <li>Click "Count Games" to see the statistics</li>
+                <li>Use "Reset" to clear all data and start over</li>
+            </ul>
+            <p><strong>Note:</strong> The system automatically handles numbered lists (e.g., "1. ", "2. ") and invisible characters from WhatsApp.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const matchInput = document.getElementById('match-input');
+            const countBtn = document.getElementById('count-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const resultsTable = document.getElementById('results-table');
+            const errorSection = document.getElementById('error-section');
+            const errorMessage = document.getElementById('error-message');
+            const totalGamesSpan = document.getElementById('total-games');
+            
+            // Count games when the button is clicked
+            countBtn.addEventListener('click', function() {
+                processMatches();
+            });
+            
+            // Reset the input and results
+            resetBtn.addEventListener('click', function() {
+                matchInput.value = '';
+                clearResults();
+                hideError();
+            });
+            
+            // Process the matches and count games
+            function processMatches() {
+                hideError();
+                const inputText = matchInput.value.trim();
+                
+                if (!inputText) {
+                    showError('Please paste some match records first.');
+                    return;
+                }
+                
+                try {
+                    const matches = parseInput(inputText);
+                    const playerCounts = countPlayerGames(matches);
+                    displayResults(playerCounts);
+                } catch (error) {
+                    showError(error.message);
+                }
+            }
+            
+            // Parse the input text into match objects
+            function parseInput(inputText) {
+                const lines = inputText.split('\n').filter(line => line.trim());
+                const matches = [];
+                
+                for (const line of lines) {
+                    // Remove line numbering (e.g., "1. ", "2. ") and trim
+                    const cleanLine = line.replace(/^\d+\.\s*/, '').trim();
+                    
+                    if (!cleanLine) continue;
+                    
+                    // Use a more flexible regex to handle different spacings around the score
+                    const matchRegex = /(.+?)\s+(\d+)\s*[-–—]\s*(\d+)\s+(.+)/;
+                    const match = cleanLine.match(matchRegex);
+                    
+                    if (!match) {
+                        throw new Error(`Invalid format in line: "${line}". Expected format: "Player1 Player2 21-12 Player3 Player4"`);
+                    }
+                    
+                    const team1Players = match[1].trim().split(/\s+/);
+                    const team2Players = match[4].trim().split(/\s+/);
+                    const score = `${match[2]}-${match[3]}`;
+                    
+                    // Validate player names
+                    if (team1Players.length < 2 || team2Players.length < 2) {
+                        throw new Error(`Each team must have at least 2 players in line: "${line}"`);
+                    }
+                    
+                    // Clean player names (remove invisible characters and normalize)
+                    const cleanTeam1 = team1Players.map(name => cleanPlayerName(name));
+                    const cleanTeam2 = team2Players.map(name => cleanPlayerName(name));
+                    
+                    matches.push({
+                        team1: cleanTeam1,
+                        team2: cleanTeam2,
+                        score: score
+                    });
+                }
+                
+                if (matches.length === 0) {
+                    throw new Error('No valid matches found in the input.');
+                }
+                
+                return matches;
+            }
+            
+            // Clean player names by removing invisible characters and normalizing
+            function cleanPlayerName(name) {
+                // Remove zero-width spaces and other invisible characters
+                let cleaned = name.replace(/[\u200B-\u200D\uFEFF]/g, '');
+                
+                // Trim and normalize whitespace
+                cleaned = cleaned.trim().replace(/\s+/g, ' ');
+                
+                return cleaned;
+            }
+            
+            // Count games for each player
+            function countPlayerGames(matches) {
+                const playerCounts = {};
+                let totalGames = 0;
+                
+                for (const match of matches) {
+                    // Count for team 1 players
+                    for (const player of match.team1) {
+                        if (player) {
+                            playerCounts[player] = (playerCounts[player] || 0) + 1;
+                            totalGames++;
+                        }
+                    }
+                    
+                    // Count for team 2 players
+                    for (const player of match.team2) {
+                        if (player) {
+                            playerCounts[player] = (playerCounts[player] || 0) + 1;
+                            totalGames++;
+                        }
+                    }
+                }
+                
+                // Since each game has 4 players, totalGames should be matches.length * 4
+                totalGamesSpan.textContent = matches.length;
+                
+                return playerCounts;
+            }
+            
+            // Display the results in the table
+            function displayResults(playerCounts) {
+                // Clear previous results
+                clearResults();
+                
+                // Convert to array and sort by count (descending)
+                const sortedPlayers = Object.entries(playerCounts)
+                    .sort((a, b) => b[1] - a[1]);
+                
+                // Add rows to the table
+                const tbody = resultsTable.querySelector('tbody');
+                
+                for (const [player, count] of sortedPlayers) {
+                    const row = document.createElement('tr');
+                    
+                    const playerCell = document.createElement('td');
+                    playerCell.textContent = player;
+                    
+                    const countCell = document.createElement('td');
+                    countCell.textContent = `${count} game${count !== 1 ? 's' : ''}`;
+                    
+                    row.appendChild(playerCell);
+                    row.appendChild(countCell);
+                    tbody.appendChild(row);
+                }
+            }
+            
+            // Clear the results table
+            function clearResults() {
+                const tbody = resultsTable.querySelector('tbody');
+                tbody.innerHTML = '';
+                totalGamesSpan.textContent = '0';
+            }
+            
+            // Show error message
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorSection.style.display = 'block';
+            }
+            
+            // Hide error message
+            function hideError() {
+                errorSection.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
