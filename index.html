@@ -125,23 +125,12 @@
         }
         
         .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 20px;
         }
         
         h2 {
             font-size: 1.8rem;
             color: var(--primary);
-        }
-        
-        .total-games {
-            background: var(--secondary);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: 600;
         }
         
         table {
@@ -208,6 +197,12 @@
             margin-bottom: 8px;
         }
         
+        .case-sensitive-note {
+            color: var(--accent);
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 border-radius: 0;
@@ -248,7 +243,6 @@
         <section class="results-section">
             <div class="results-header">
                 <h2>Player Statistics</h2>
-                <div class="total-games">Total Games: <span id="total-games">0</span></div>
             </div>
             <table id="results-table">
                 <thead>
@@ -266,12 +260,13 @@
         <div class="instructions">
             <h3>How to use:</h3>
             <ul>
+                <li>Characters <strong>CASE SENSITIVE</strong>
                 <li>Copy the match records from your WhatsApp chat</li>
                 <li>Paste them into the text area above</li>
                 <li>Click "Count Games" to see the statistics</li>
                 <li>Use "Reset" to clear all data and start over</li>
-                <li>Charaters are <strong>CASE SENSITIVE</strong></li>
             </ul>
+            <p class="case-sensitive-note">Characters are CASE SENSITIVE</p>
             <p><strong>Note:</strong> The system automatically handles numbered lists (e.g., "1. ", "2. ") and invisible characters from WhatsApp.</p>
         </div>
     </div>
@@ -284,7 +279,6 @@
             const resultsTable = document.getElementById('results-table');
             const errorSection = document.getElementById('error-section');
             const errorMessage = document.getElementById('error-message');
-            const totalGamesSpan = document.getElementById('total-games');
             
             // Count games when the button is clicked
             countBtn.addEventListener('click', function() {
@@ -368,6 +362,12 @@
                 // Remove zero-width spaces and other invisible characters
                 let cleaned = name.replace(/[\u200B-\u200D\uFEFF]/g, '');
                 
+                // Remove other non-printable characters
+                cleaned = cleaned.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+                
+                // Remove special Unicode formatting characters
+                cleaned = cleaned.replace(/[\u202A-\u202E\u2060-\u2069]/g, '');
+                
                 // Trim and normalize whitespace
                 cleaned = cleaned.trim().replace(/\s+/g, ' ');
                 
@@ -377,14 +377,12 @@
             // Count games for each player
             function countPlayerGames(matches) {
                 const playerCounts = {};
-                let totalGames = 0;
                 
                 for (const match of matches) {
                     // Count for team 1 players
                     for (const player of match.team1) {
                         if (player) {
                             playerCounts[player] = (playerCounts[player] || 0) + 1;
-                            totalGames++;
                         }
                     }
                     
@@ -392,13 +390,9 @@
                     for (const player of match.team2) {
                         if (player) {
                             playerCounts[player] = (playerCounts[player] || 0) + 1;
-                            totalGames++;
                         }
                     }
                 }
-                
-                // Since each game has 4 players, totalGames should be matches.length * 4
-                totalGamesSpan.textContent = matches.length;
                 
                 return playerCounts;
             }
@@ -434,7 +428,6 @@
             function clearResults() {
                 const tbody = resultsTable.querySelector('tbody');
                 tbody.innerHTML = '';
-                totalGamesSpan.textContent = '0';
             }
             
             // Show error message
