@@ -288,12 +288,7 @@
             function processMatches() {
                 hideError();
                 const inputText = matchInput.value.trim();
-                
-                if (!inputText) {
-                    showError('Please paste some match records first.');
-                    return;
-                }
-                
+                                          
                 try {
                     const matches = parseInput(inputText);
                     const playerCounts = countPlayerGames(matches);
