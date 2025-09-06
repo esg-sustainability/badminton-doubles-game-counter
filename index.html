@@ -232,8 +232,7 @@
         
         <section class="input-section">
             <div class="input-area">
-                <textarea id="match-input" placeholder="Paste your match records here (e.g., '1. Alvan Ang 21-12 Desment Jason')">
-                    </textarea>
+                <textarea id="match-input" placeholder="Paste your match records here (e.g., '1. Alvan Ang 21-12 Desment Jason')"></textarea>
                 <div class="buttons">
                     <button id="count-btn">Count Games</button>
                     <button id="reset-btn">Reset</button>
@@ -249,13 +248,13 @@
         <section class="results-section">
             <div class="results-header">
                 <h2>Player Statistics</h2>
-                <div class="total-games">Total Matches: <span id="total-matches">0</span></div>
+                <div class="total-games">Total Games: <span id="total-games">0</span></div>
             </div>
             <table id="results-table">
                 <thead>
                     <tr>
                         <th>Player Name</th>
-                        <th>Games Played</th>
+                        <th>Total Games</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -271,7 +270,7 @@
                 <li>Paste them into the text area above</li>
                 <li>Click "Count Games" to see the statistics</li>
                 <li>Use "Reset" to clear all data and start over</li>
-                <i>Characters are <strong>CASE SENSITIVE</strong></i>
+                <li>Characters are <strong>CASE SENSITIVE</strong></li>
             </ul>
             <p><strong>Note:</strong> The system automatically handles numbered lists (e.g., "1. ", "2. ") and invisible characters from WhatsApp.</p>
         </div>
@@ -285,7 +284,7 @@
             const resultsTable = document.getElementById('results-table');
             const errorSection = document.getElementById('error-section');
             const errorMessage = document.getElementById('error-message');
-            const totalMatchesSpan = document.getElementById('total-matches');
+            const totalGamesSpan = document.getElementById('total-games');
             
             // Count games when the button is clicked
             countBtn.addEventListener('click', function() {
@@ -312,7 +311,7 @@
                 try {
                     const matches = parseInput(inputText);
                     const playerCounts = countPlayerGames(matches);
-                    displayResults(playerCounts, matches.length);
+                    displayResults(playerCounts);
                 } catch (error) {
                     showError(error.message);
                 }
@@ -325,7 +324,7 @@
                 
                 for (const line of lines) {
                     // Remove line numbering (e.g., "1. ", "2. ") and trim
-                    const cleanLine = line.replace(/^\s*\d+\.\s*/, '').trim();
+                    const cleanLine = line.replace(/^\d+\.\s*/, '').trim();
                     
                     if (!cleanLine) continue;
                     
@@ -339,6 +338,7 @@
                     
                     const team1Players = match[1].trim().split(/\s+/);
                     const team2Players = match[4].trim().split(/\s+/);
+                    const score = `${match[2]}-${match[3]}`;
                     
                     // Validate player names
                     if (team1Players.length < 2 || team2Players.length < 2) {
@@ -346,12 +346,13 @@
                     }
                     
                     // Clean player names (remove invisible characters and normalize)
-                    const cleanTeam1 = team1Players.map(name => cleanPlayerName(name)).filter(name => name);
-                    const cleanTeam2 = team2Players.map(name => cleanPlayerName(name)).filter(name => name);
+                    const cleanTeam1 = team1Players.map(name => cleanPlayerName(name));
+                    const cleanTeam2 = team2Players.map(name => cleanPlayerName(name));
                     
                     matches.push({
                         team1: cleanTeam1,
                         team2: cleanTeam2,
+                        score: score
                     });
                 }
                 
@@ -364,13 +365,8 @@
             
             // Clean player names by removing invisible characters and normalizing
             function cleanPlayerName(name) {
-                if (!name) return '';
-                
                 // Remove zero-width spaces and other invisible characters
                 let cleaned = name.replace(/[\u200B-\u200D\uFEFF]/g, '');
-                
-                // Remove other non-printable characters
-                cleaned = cleaned.replace(/[^\x20-\x7E]/g, '');
                 
                 // Trim and normalize whitespace
                 cleaned = cleaned.trim().replace(/\s+/g, ' ');
@@ -381,12 +377,14 @@
             // Count games for each player
             function countPlayerGames(matches) {
                 const playerCounts = {};
+                let totalGames = 0;
                 
                 for (const match of matches) {
                     // Count for team 1 players
                     for (const player of match.team1) {
                         if (player) {
                             playerCounts[player] = (playerCounts[player] || 0) + 1;
+                            totalGames++;
                         }
                     }
                     
@@ -394,20 +392,21 @@
                     for (const player of match.team2) {
                         if (player) {
                             playerCounts[player] = (playerCounts[player] || 0) + 1;
+                            totalGames++;
                         }
                     }
                 }
+                
+                // Since each game has 4 players, totalGames should be matches.length * 4
+                totalGamesSpan.textContent = matches.length;
                 
                 return playerCounts;
             }
             
             // Display the results in the table
-            function displayResults(playerCounts, totalMatches) {
+            function displayResults(playerCounts) {
                 // Clear previous results
                 clearResults();
-                
-                // Update total matches count
-                totalMatchesSpan.textContent = totalMatches;
                 
                 // Convert to array and sort by count (descending)
                 const sortedPlayers = Object.entries(playerCounts)
@@ -435,7 +434,7 @@
             function clearResults() {
                 const tbody = resultsTable.querySelector('tbody');
                 tbody.innerHTML = '';
-                totalMatchesSpan.textContent = '0';
+                totalGamesSpan.textContent = '0';
             }
             
             // Show error message
@@ -448,9 +447,6 @@
             function hideError() {
                 errorSection.style.display = 'none';
             }
-            
-            // Auto-process the sample data on page load
-            setTimeout(processMatches, 500);
         });
     </script>
 </body>
