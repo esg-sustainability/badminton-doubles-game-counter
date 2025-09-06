@@ -265,13 +265,13 @@
         <section class="results-section">
             <div class="results-header">
                 <h2>Player Statistics</h2>
-                <div class="total-games">Total Games: <span id="total-games">0</span></div>
+                <div class="total-games">Total Matches: <span id="total-matches">0</span></div>
             </div>
             <table id="results-table">
                 <thead>
                     <tr>
                         <th>Player Name</th>
-                        <th>Total Games</th>
+                        <th>Games Played</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -300,7 +300,7 @@
             const resultsTable = document.getElementById('results-table');
             const errorSection = document.getElementById('error-section');
             const errorMessage = document.getElementById('error-message');
-            const totalGamesSpan = document.getElementById('total-games');
+            const totalMatchesSpan = document.getElementById('total-matches');
             
             // Count games when the button is clicked
             countBtn.addEventListener('click', function() {
@@ -327,7 +327,7 @@
                 try {
                     const matches = parseInput(inputText);
                     const playerCounts = countPlayerGames(matches);
-                    displayResults(playerCounts);
+                    displayResults(playerCounts, matches.length);
                 } catch (error) {
                     showError(error.message);
                 }
@@ -340,7 +340,7 @@
                 
                 for (const line of lines) {
                     // Remove line numbering (e.g., "1. ", "2. ") and trim
-                    const cleanLine = line.replace(/^\d+\.\s*/, '').trim();
+                    const cleanLine = line.replace(/^\s*\d+\.\s*/, '').trim();
                     
                     if (!cleanLine) continue;
                     
@@ -354,7 +354,6 @@
                     
                     const team1Players = match[1].trim().split(/\s+/);
                     const team2Players = match[4].trim().split(/\s+/);
-                    const score = `${match[2]}-${match[3]}`;
                     
                     // Validate player names
                     if (team1Players.length < 2 || team2Players.length < 2) {
@@ -362,13 +361,12 @@
                     }
                     
                     // Clean player names (remove invisible characters and normalize)
-                    const cleanTeam1 = team1Players.map(name => cleanPlayerName(name));
-                    const cleanTeam2 = team2Players.map(name => cleanPlayerName(name));
+                    const cleanTeam1 = team1Players.map(name => cleanPlayerName(name)).filter(name => name);
+                    const cleanTeam2 = team2Players.map(name => cleanPlayerName(name)).filter(name => name);
                     
                     matches.push({
                         team1: cleanTeam1,
                         team2: cleanTeam2,
-                        score: score
                     });
                 }
                 
@@ -381,6 +379,8 @@
             
             // Clean player names by removing invisible characters and normalizing
             function cleanPlayerName(name) {
+                if (!name) return '';
+                
                 // Remove zero-width spaces and other invisible characters
                 let cleaned = name.replace(/[\u200B-\u200D\uFEFF]/g, '');
                 
@@ -413,16 +413,16 @@
                     }
                 }
                 
-                // Update total games count
-                totalGamesSpan.textContent = matches.length;
-                
                 return playerCounts;
             }
             
             // Display the results in the table
-            function displayResults(playerCounts) {
+            function displayResults(playerCounts, totalMatches) {
                 // Clear previous results
                 clearResults();
+                
+                // Update total matches count
+                totalMatchesSpan.textContent = totalMatches;
                 
                 // Convert to array and sort by count (descending)
                 const sortedPlayers = Object.entries(playerCounts)
@@ -450,7 +450,7 @@
             function clearResults() {
                 const tbody = resultsTable.querySelector('tbody');
                 tbody.innerHTML = '';
-                totalGamesSpan.textContent = '0';
+                totalMatchesSpan.textContent = '0';
             }
             
             // Show error message
